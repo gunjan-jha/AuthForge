@@ -5,6 +5,8 @@ from app.api.auth import auth_router
 from app.api.users import router
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.middleware.cors import CORSMiddleware
+from alembic.config import Config
+from alembic import command
 # Base.metadata.create_all(bind=engine)
 app=FastAPI()
 app.add_middleware(
@@ -14,6 +16,14 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"]
 )
+
+
+
+def run_migrations():
+    alembic_cfg = Config("alembic.ini")
+    command.upgrade(alembic_cfg, "head")
+
+run_migrations()
 
 app.add_middleware(
     SessionMiddleware,
