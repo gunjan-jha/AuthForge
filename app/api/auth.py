@@ -114,7 +114,8 @@ async def google_login(
 
     return await oauth.google.authorize_redirect(
         request,
-        redirect_uri
+        redirect_uri,
+        prompt="select_account",
     )
 
 from fastapi.responses import RedirectResponse
