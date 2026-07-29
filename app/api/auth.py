@@ -106,8 +106,10 @@ def signup(
 async def google_login(
         request:Request
 ):
+    redirect_urir="https://authforge-5wl9.onrender.com/auth/google/callback"
+    print("Here it is redirecting  to")
     redirect_uri=(
-        "http://localhost:8000/auth/google/callback"
+        redirect_urir
     )
 
     return await oauth.google.authorize_redirect(
