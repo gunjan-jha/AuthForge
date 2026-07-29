@@ -118,39 +118,44 @@ async def google_login(
     )
 
 @auth_router.get("/google/callback")
-async def google_callback(
-    request:Request,
-    db:Session=Depends(get_db)
-):
-    token =await  oauth.google.authorize_access_token(
-        request
-    )
-    userinfo =token["userinfo"]
-    email = userinfo["email"]
-    google_id = userinfo["sub"]
+async def google_callback(request: Request, db: Session = Depends(get_db)):
+    try:
+        token = await oauth.google.authorize_access_token(request)
+        print(token)
 
-    user = get_user_by_email(db,email)
+        userinfo = token["userinfo"]
+        print(userinfo)
 
-    if not user:
-        user = create_social_user(
-            db=db,
-            email=email,
-            provider="google",
-            provider_id=google_id
-        )
+        email = userinfo["email"]
+        google_id = userinfo["sub"]
 
-        acess_token = create_access_token(
+        user = get_user_by_email(db, email)
+
+        if not user:
+            user = create_social_user(
+                db=db,
+                email=email,
+                provider="google",
+                provider_id=google_id,
+            )
+
+        access_token = create_access_token(
             {
-                "sub":str(user.id),
-                "role":user.role
+                "sub": str(user.id),
+                "role": user.role,
             }
         )
 
         return {
-            "acess_token":acess_token,
-            "token_type":"bearer",
-            "email":user.email
+            "access_token": access_token,
+            "token_type": "bearer",
+            "email": user.email,
         }
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"error": str(e)}
     
 @auth_router.post("/refresh")
 def refresh_acess_token(
