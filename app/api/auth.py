@@ -117,45 +117,56 @@ async def google_login(
         redirect_uri
     )
 
+from fastapi.responses import RedirectResponse
+from urllib.parse import urlencode
+
 @auth_router.get("/google/callback")
-async def google_callback(request: Request, db: Session = Depends(get_db)):
-    try:
-        token = await oauth.google.authorize_access_token(request)
-        print(token)
+async def google_callback(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    token = await oauth.google.authorize_access_token(request)
 
-        userinfo = token["userinfo"]
-        print(userinfo)
+    userinfo = token["userinfo"]
 
-        email = userinfo["email"]
-        google_id = userinfo["sub"]
+    email = userinfo["email"]
+    google_id = userinfo["sub"]
 
-        user = get_user_by_email(db, email)
+    user = get_user_by_email(db, email)
 
-        if not user:
-            user = create_social_user(
-                db=db,
-                email=email,
-                provider="google",
-                provider_id=google_id,
-            )
-
-        access_token = create_access_token(
-            {
-                "sub": str(user.id),
-                "role": user.role,
-            }
+    if not user:
+        user = create_social_user(
+            db=db,
+            email=email,
+            provider="google",
+            provider_id=google_id
         )
 
-        return {
-            "access_token": access_token,
-            "token_type": "bearer",
+    access_token = create_access_token(
+        {
+            "sub": str(user.id),
             "email": user.email,
+            "role": user.role
         }
+    )
 
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return {"error": str(e)}
+    refresh_token = create_refresh_token()
+
+    save_refresh_token(
+        db=db,
+        token=refresh_token,
+        user_id=user.id,
+        expires_at=datetime.utcnow() + timedelta(days=30)
+    )
+
+    params = urlencode({
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+    })
+
+    return RedirectResponse(
+        url=f"https://auth-forge-frontend.netlify.app/google/callback?{params}"
+    )
     
 @auth_router.post("/refresh")
 def refresh_acess_token(
