@@ -165,7 +165,7 @@ async def google_callback(
     })
 
     return RedirectResponse(
-        url=f"https://auth-forge-frontend.netlify.app/google/callback?{params}"
+        url=f"https://auth-forge-frontend.netlify.app/auth/google/callback?{params}"
     )
     
 @auth_router.post("/refresh")
