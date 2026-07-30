@@ -14,7 +14,7 @@ router = APIRouter(
 def make_admin(
         user_id:str,
         db:Session=Depends(get_db),
-        current_user=Depends(get_current_user())
+        current_user=Depends(get_current_user)
 ):
     user = get_user_by_id(db,user_id)
 
