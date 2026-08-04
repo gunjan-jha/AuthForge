@@ -11,7 +11,7 @@ from alembic import command
 app=FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173","https://auth-forge-frontend.netlify.app"],
+    allow_origins=["http://localhost:5173","https://auth-forge-frontend.netlify.app","http://127.0.0.1:5500"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"]
