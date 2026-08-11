@@ -11,7 +11,9 @@ from alembic import command
 app=FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173","https://auth-forge-frontend.netlify.app"],
+    allow_origins=["http://localhost:5173",
+                   "https://auth-forge-frontend.netlify.app",
+                   "https://ragchatbotgk.netlify.app"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"]
@@ -23,7 +25,7 @@ def run_migrations():
     alembic_cfg = Config("alembic.ini")
     command.upgrade(alembic_cfg, "head")
 
-run_migrations()
+# run_migrations()
 
 app.add_middleware(
     SessionMiddleware,

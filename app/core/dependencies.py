@@ -49,7 +49,6 @@ def require_role(required_role:str):
     def checker(
             current_user=Depends(get_current_user)
     ):
-        print("current role --",current_user.role)
         if current_user.role!=required_role:
             raise HTTPException(
                 status_code=403,
