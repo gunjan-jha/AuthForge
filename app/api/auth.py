@@ -104,18 +104,16 @@ def signup(
 
 @auth_router.get("/google/login")
 async def google_login(
-        request:Request
+        request:Request,
+        redirect_url:str=None
 ):
-    redirect_urir="https://authforge-5wl9.onrender.com/auth/google/callback"
-    print("Here it is redirecting  to")
-    redirect_uri=(
-        redirect_urir
-    )
-
+    state= redirect_url if redirect_url else "https://auth-forge-frontend.netlify.app/auth/google/callback"
+    redirect_uri =request.url_for("google_callback")
     return await oauth.google.authorize_redirect(
         request,
         redirect_uri,
-        prompt="select_account",
+        state=state,
+        prompt="select_account"
     )
 
 from fastapi.responses import RedirectResponse
@@ -165,10 +163,15 @@ async def google_callback(
         "refresh_token": refresh_token,
     })
 
-    return RedirectResponse(
-        url=f"https://auth-forge-frontend.netlify.app/auth/google/callback?{params}"
-    )
-    
+    # Read the target URL from the OAuth state parameter, defaulting to AuthForge frontend
+    target_url = request.query_params.get("state") or "https://auth-forge-frontend.netlify.app/auth/google/callback"
+
+    # Append parameters cleanly
+    separator = "&" if "?" in target_url else "?"
+    redirect_destination = f"{target_url}{separator}{params}"
+
+    return RedirectResponse(url=redirect_destination)
+
 @auth_router.post("/refresh")
 def refresh_acess_token(
     payload: RefreshRequest,
